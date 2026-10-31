@@ -372,6 +372,28 @@ def test_load_str():
     assert thrift.__thrift_meta__['services'] == [thrift.SharedService]
 
 
+def test_load_str_cache_disabled_by_default():
+    from thriftpy2.parser import parser as _parser
+    _parser._thrift_cache.clear()
+
+    first = load_str('const i32 X = 1', 'str_nocache_thrift')
+    second = load_str('const i32 X = 2', 'str_nocache_thrift')
+    assert first.X == 1
+    assert second.X == 2
+    assert 'str_nocache_thrift' not in _parser._thrift_cache
+
+
+def test_load_str_enable_cache():
+    from thriftpy2.parser import parser as _parser
+    _parser._thrift_cache.clear()
+
+    first = load_str('const i32 X = 1', 'str_cache_thrift', enable_cache=True)
+    second = load_str('const i32 X = 2', 'str_cache_thrift',
+                      enable_cache=True)
+    assert second is first
+    assert second.X == 1
+
+
 def test_e_load_fp():
     with pytest.raises(ThriftParserError) as excinfo:
         with open(TEST_DIR / 'parser-cases/tutorial.thrift') as thrift_fp:

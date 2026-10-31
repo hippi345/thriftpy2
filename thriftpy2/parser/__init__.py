@@ -75,10 +75,19 @@ def load_fp(source: TextIO, module_name: str) -> types.ModuleType:
     return thrift
 
 
-def load_str(source: str, module_name: str) -> types.ModuleType:
+def load_str(
+    source: str,
+    module_name: str,
+    enable_cache: bool = False,
+) -> types.ModuleType:
     """Load thrift IDL from a string as a module.
+
+    The parse cache is keyed by `module_name` only and shared with `load()`,
+    so caching is off by default: with `enable_cache=True`, a later call with
+    the same `module_name` returns the cached module even if `source` differs.
     """
-    thrift = parse_fp(io.StringIO(source), module_name)
+    thrift = parse_fp(io.StringIO(source), module_name,
+                      enable_cache=enable_cache)
     sys.modules[module_name] = thrift
     return thrift
 
